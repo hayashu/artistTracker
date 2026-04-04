@@ -1,0 +1,47 @@
+.marker {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: transform 200ms ease;
+}
+
+.marker:hover {
+  transform: scale(1.4);
+}
+
+.markerSelected {
+  transform: scale(1.6);
+  border-width: 3px;
+  box-shadow: 0 0 8px rgba(29, 185, 84, 0.6);
+}
+
+.popup .maplibregl-popup-content {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0;
+  color: var(--text-primary);
+}
+
+.popup .maplibregl-popup-tip {
+  border-top-color: var(--bg-secondary);
+}
+
+.popupContent {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.popupContent strong {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.popupContent span {
+  color: var(--text-secondary);
+}

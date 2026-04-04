@@ -1,0 +1,31 @@
+.container {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  z-index: 10;
+}
+
+.btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all var(--transition);
+}
+
+.btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.btn.active {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
