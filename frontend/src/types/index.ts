@@ -54,6 +54,14 @@ export interface NearbyEvent {
   daysDiff: number;
 }
 
+export interface ClusterPin {
+  id: string;
+  lat: number;   // セントロイドの緯度
+  lng: number;   // セントロイドの経度
+  count: number; // 所属ピン数
+  pins: MapPin[]; // クラスタ内の個別ピン
+}
+
 export type ViewMode = "globe" | "map";
 
 export type SearchState = "idle" | "loading" | "success" | "error";

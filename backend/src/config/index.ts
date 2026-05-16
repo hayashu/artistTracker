@@ -12,7 +12,10 @@ function requireEnv(name: string): string {
 export const config = {
   port: parseInt(process.env.PORT || "3001", 10),
   ticketmasterApiKey: requireEnv("TICKETMASTER_API_KEY"),
-  allowedOrigin: process.env.ALLOWED_ORIGIN || "http://localhost:3000",
+  allowedOrigins: (process.env.ALLOWED_ORIGIN || "http://localhost:3000")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
   redisUrl: process.env.REDIS_URL || "redis://localhost:6379",
   token: process.env.IPINFO_TOKEN,
   sessionSecret: requireEnv("SESSION_SECRET")

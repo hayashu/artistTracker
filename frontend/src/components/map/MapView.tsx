@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import Map, { Marker, Popup, NavigationControl } from "react-map-gl/maplibre";
 import type { MapPin } from "@/types";
+// import type { ClusterPin } from "@/types";
+// import { clusterPins, getKForZoom } from "@/utils/kmeans";
 import styles from "./MapView.module.css";
 
 interface MapViewProps {
@@ -19,15 +21,23 @@ export function MapView({ pins, selectedPinId, onPinClick }: MapViewProps) {
     zoom: 1.5,
   });
 
+  // k-means clustering is temporarily disabled.
+  // const clusters = useMemo<ClusterPin[] | null>(() => {
+  //   const k = getKForZoom(pins.length, viewState.zoom);
+  //   if (k >= pins.length) return null; // 個別ピン表示
+  //   return clusterPins(pins, k);
+  // }, [pins, viewState.zoom]);
+
   useEffect(() => {
     if (!selectedPinId) return;
     const pin = pins.find((p) => p.id === selectedPinId);
     if (pin) {
-      setViewState({
+      setViewState((prev) => ({
+        ...prev,
         longitude: pin.lng,
         latitude: pin.lat,
         zoom: 5,
-      });
+      }));
       setPopupPin(pin);
     }
   }, [selectedPinId, pins]);
@@ -40,6 +50,16 @@ export function MapView({ pins, selectedPinId, onPinClick }: MapViewProps) {
     [onPinClick]
   );
 
+  // k-means clustering is temporarily disabled.
+  // const handleClusterClick = useCallback((cluster: ClusterPin) => {
+  //   setViewState((prev) => ({
+  //     ...prev,
+  //     longitude: cluster.lng,
+  //     latitude: cluster.lat,
+  //     zoom: Math.min(prev.zoom + 2.5, 10),
+  //   }));
+  // }, []);
+
   return (
     <Map
       {...viewState}
@@ -49,6 +69,25 @@ export function MapView({ pins, selectedPinId, onPinClick }: MapViewProps) {
     >
       <NavigationControl position="bottom-right" />
 
+      {/*
+        k-means clustering is temporarily disabled.
+        {clusters
+          ? clusters.map((cluster) => (
+              <Marker
+                key={cluster.id}
+                longitude={cluster.lng}
+                latitude={cluster.lat}
+                anchor="center"
+                onClick={(e) => {
+                  e.originalEvent.stopPropagation();
+                  handleClusterClick(cluster);
+                }}
+              >
+                <div className={styles.clusterMarker}>{cluster.count}</div>
+              </Marker>
+            ))
+          : pins.map((pin) => (...))}
+      */}
       {pins.map((pin) => (
         <Marker
           key={pin.id}

@@ -45,3 +45,24 @@
 .popupContent span {
   color: var(--text-secondary);
 }
+
+.clusterMarker {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(29, 185, 84, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  transition: transform 200ms ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.clusterMarker:hover {
+  transform: scale(1.15);
+}

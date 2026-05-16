@@ -12,7 +12,17 @@ const app = express();
 
 app.use(
   cors({
-    origin: config.allowedOrigin,
+    origin(origin, callback) {
+      if (
+        !origin ||
+        config.allowedOrigins.includes(origin) ||
+        /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)
+      ) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`Origin not allowed by CORS: ${origin}`));
+    },
     methods: ["GET"],
   })
 );
