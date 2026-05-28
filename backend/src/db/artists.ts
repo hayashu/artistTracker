@@ -1,13 +1,18 @@
 import prisma from "../lib/prisma";
 import type { ArtistSearchResult } from "../types/ticketmaster";
+import { sortArtistSuggestions } from "../utils/suggestions";
 
 export async function searchArtistNamesByKeyword(keyword: string): Promise<string[]> {
+  const input = keyword.trim().toLowerCase();
   const artists = await prisma.artist.findMany({
-    where: { name: { contains: keyword, mode: "insensitive" } },
+    where: { name: { contains: input, mode: "insensitive" } },
     select: { name: true },
-    take: 7,
+    take: 30,
   });
-  return artists.map((a) => a.name);
+  return sortArtistSuggestions(
+    artists.map((a) => a.name),
+    input
+  ).slice(0, 7);
 }
 
 export async function getAllArtistNames(): Promise<string[]> {

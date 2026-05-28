@@ -20,7 +20,7 @@ model Artist {
   id       String  @id
   name     String
   url      String?
-  imageUrl String
+  imageUrl String?
   genre    String?
   subGenre String?
   events   Event[]

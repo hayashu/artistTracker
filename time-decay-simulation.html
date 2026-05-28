@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Time Decay Ranking Simulation</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f7f4;
+      --ink: #1d1d1f;
+      --muted: #6d6d73;
+      --line: #d9d9d2;
+      --panel: #ffffff;
+      --accent: #0f8b8d;
+      --accent-soft: #d9f0ef;
+      --warn: #b15f00;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 20px 64px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 0 0 28px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .formula {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 14px;
+      border-radius: 8px;
+      margin-bottom: 22px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 22px;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .value {
+      min-width: 110px;
+      text-align: right;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .artist {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .artist.winner {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .artist h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .score {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: right;
+      font-size: 14px;
+    }
+
+    th:first-child,
+    td:first-child {
+      text-align: left;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    th {
+      background: #eeeeea;
+      font-size: 13px;
+      color: #3a3a3f;
+    }
+
+    .note {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .winnerText {
+      margin: 0 0 18px;
+      padding: 12px 14px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 720px) {
+      .grid,
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .value {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Time Decay Ranking Simulation</h1>
+    <p class="lead">
+      検索回数に「どれくらい最近検索されたか」の重みを掛けて、サジェスト順位を決めるシミュレーションです。
+    </p>
+
+    <div class="formula">
+      score = Σ search_count × exp(-λ × days_ago), λ = ln(2) / half_life_days
+    </div>
+
+    <section class="controls" aria-label="settings">
+      <div>
+        <label for="halfLife">半減期</label>
+        <input id="halfLife" type="range" min="7" max="365" step="1" value="30" />
+      </div>
+      <div class="value"><span id="halfLifeValue">30</span> days</div>
+    </section>
+
+    <p id="winnerText" class="winnerText"></p>
+
+    <section class="grid" id="artistCards"></section>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Artist</th>
+          <th>Today</th>
+          <th>1 Month Ago</th>
+          <th>1 Year Ago</th>
+          <th>Total Score</th>
+        </tr>
+      </thead>
+      <tbody id="summaryRows"></tbody>
+    </table>
+
+    <p class="note">
+      半減期が短いほど最近の検索を強く評価します。半減期が長いほど、1年前の検索実績もランキングに残りやすくなります。
+    </p>
+  </main>
+
+  <script>
+    const artists = [
+      {
+        name: "Olivia Deen",
+        searches: [
+          { label: "Today", daysAgo: 0, count: 100 },
+          { label: "1 Month Ago", daysAgo: 30, count: 100 },
+          { label: "1 Year Ago", daysAgo: 365, count: 1 },
+        ],
+      },
+      {
+        name: "Olivia Rodrigo",
+        searches: [
+          { label: "Today", daysAgo: 0, count: 100 },
+          { label: "1 Month Ago", daysAgo: 30, count: 10 },
+          { label: "1 Year Ago", daysAgo: 365, count: 1000 },
+        ],
+      },
+    ];
+
+    const halfLifeInput = document.getElementById("halfLife");
+    const halfLifeValue = document.getElementById("halfLifeValue");
+    const artistCards = document.getElementById("artistCards");
+    const summaryRows = document.getElementById("summaryRows");
+    const winnerText = document.getElementById("winnerText");
+
+    function weight(daysAgo, halfLife) {
+      const lambda = Math.log(2) / halfLife;
+      return Math.exp(-lambda * daysAgo);
+    }
+
+    function contribution(search, halfLife) {
+      return search.count * weight(search.daysAgo, halfLife);
+    }
+
+    function scoreArtist(artist, halfLife) {
+      return artist.searches.reduce((sum, search) => sum + contribution(search, halfLife), 0);
+    }
+
+    function formatNumber(value) {
+      return value.toLocaleString("en-US", {
+        maximumFractionDigits: 3,
+      });
+    }
+
+    function render() {
+      const halfLife = Number(halfLifeInput.value);
+      halfLifeValue.textContent = String(halfLife);
+
+      const ranked = artists
+        .map((artist) => ({
+          ...artist,
+          score: scoreArtist(artist, halfLife),
+        }))
+        .sort((a, b) => b.score - a.score);
+
+      const winner = ranked[0];
+      winnerText.textContent = `${winner.name} が上位です。score = ${formatNumber(winner.score)}`;
+
+      artistCards.innerHTML = ranked
+        .map((artist, index) => {
+          const rows = artist.searches
+            .map((search) => {
+              const w = weight(search.daysAgo, halfLife);
+              const c = contribution(search, halfLife);
+              return `
+                <tr>
+                  <td>${search.label}</td>
+                  <td>${search.count}</td>
+                  <td>${formatNumber(w)}</td>
+                  <td>${formatNumber(c)}</td>
+                </tr>
+              `;
+            })
+            .join("");
+
+          return `
+            <article class="artist ${index === 0 ? "winner" : ""}">
+              <h2>${artist.name}</h2>
+              <div class="score">${formatNumber(artist.score)}</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Count</th>
+                    <th>Weight</th>
+                    <th>Contribution</th>
+                  </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </article>
+          `;
+        })
+        .join("");
+
+      summaryRows.innerHTML = ranked
+        .map((artist) => {
+          const values = artist.searches.map((search) => contribution(search, halfLife));
+          return `
+            <tr>
+              <td>${artist.name}</td>
+              <td>${formatNumber(values[0])}</td>
+              <td>${formatNumber(values[1])}</td>
+              <td>${formatNumber(values[2])}</td>
+              <td><strong>${formatNumber(artist.score)}</strong></td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    halfLifeInput.addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>
