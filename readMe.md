@@ -78,6 +78,37 @@
 - Docker / Docker Compose
 - Ticketmaster API キー
 
+### Ticketmaster API キーの取得
+
+1. [Ticketmaster Developer Portal](https://developer.ticketmaster.com/) にアクセスします。
+2. アカウントを作成、またはログインします。
+3. 上タブの"My Apps"より"Add New Application"をクリックし、Appを作成します。
+4. 作成後、表示される `Consumer Key` を確認します。
+5. この `Consumer Key` を、このアプリでは `TICKETMASTER_API_KEY` として使います。
+
+Ticketmaster Discovery API では、API キーを `apikey` クエリパラメータとして渡します。
+
+```text
+https://app.ticketmaster.com/discovery/v2/events.json?apikey=YOUR_API_KEY
+```
+
+このプロジェクトでは API キーをコードに直接書かず、`backend/.env` に保存します。
+
+```env
+TICKETMASTER_API_KEY=your_ticketmaster_api_key
+```
+
+このアプリで主に使う Ticketmaster API は以下です。
+
+| 用途 | エンドポイント |
+| --- | --- |
+| アーティスト検索 | `GET /discovery/v2/attractions.json` |
+| イベント検索 | `GET /discovery/v2/events.json` |
+
+参考:
+- [Ticketmaster Developer Portal](https://developer.ticketmaster.com/)
+- [Discovery API v2 Documentation](https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/)
+
 ### Docker Compose で起動
 
 `backend/.env` を作成します。Docker 内の `DATABASE_URL` / `REDIS_URL` / `PORT` は `docker-compose.yml` 側で上書きするため、ローカル実行用の値が入っていても構いません。
