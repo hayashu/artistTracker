@@ -49,9 +49,9 @@
 ## アーキテクチャ
 
 ```
-ブラウザ (Next.js) ──→ Express (:3001) ──→ Redis (:6379)
+ブラウザ (Next.js :3003) ──→ Express (:3004) ──→ Redis (:6379)
                                           ↕
-                                      PostgreSQL
+                                  PostgreSQL (:5432)
                                           ↕
                                    Ticketmaster API
 ```
@@ -75,23 +75,55 @@
 ## セットアップ
 
 ### 前提条件
-- Node.js v18 以上
-- Redis サーバー
-- PostgreSQL サーバー
+- Docker / Docker Compose
 - Ticketmaster API キー
 
-### Docker で Redis / PostgreSQL を起動
+### Docker Compose で起動
 
-```bash
-docker run -d -p 6379:6379 redis:alpine
-docker run -d -p 5432:5432 \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=artist_tracker \
-  postgres:16-alpine
+`backend/.env` を作成します。Docker 内の `DATABASE_URL` / `REDIS_URL` / `PORT` は `docker-compose.yml` 側で上書きするため、ローカル実行用の値が入っていても構いません。
+
+```env
+TICKETMASTER_API_KEY=your_key
+SESSION_SECRET=your_random_secret
+IPINFO_TOKEN=optional
 ```
 
-### 環境変数
+`frontend/.env.local` を作成します。
+
+```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:3004
+```
+
+起動:
+
+```bash
+npm run docker:up
+```
+
+以下の URL でアクセスします。
+
+```text
+Frontend: http://localhost:3003
+Backend:  http://localhost:3004
+Postgres: Docker 内部ネットワークの postgres:5432
+Redis:    Docker 内部ネットワークの redis:6379
+```
+
+停止:
+
+```bash
+npm run docker:down
+```
+
+ログ確認:
+
+```bash
+npm run docker:logs
+```
+
+### ローカルで直接起動する場合
+
+Docker を使わずに起動する場合は、Node.js v18 以上、Redis、PostgreSQL を別途用意します。
 
 `backend/.env`
 
@@ -100,17 +132,17 @@ TICKETMASTER_API_KEY=your_key
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/artist_tracker
 REDIS_URL=redis://localhost:6379
 SESSION_SECRET=your_random_secret
-PORT=3001
-ALLOWED_ORIGIN=http://localhost:3000
+PORT=3004
+ALLOWED_ORIGIN=http://localhost:3003
 ```
 
 `frontend/.env.local`
 
 ```env
-NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
+NEXT_PUBLIC_BACKEND_URL=http://localhost:3004
 ```
 
-### 起動
+起動:
 
 ```bash
 npm install
@@ -118,4 +150,4 @@ cd backend && npx prisma migrate deploy && cd ..
 npm run dev
 ```
 
-http://localhost:3000 をブラウザで開く。
+http://localhost:3003 をブラウザで開く。

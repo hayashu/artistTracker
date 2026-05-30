@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: artist_tracker
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d artist_tracker"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+
+  backend:
+    build:
+      context: .
+      target: dev
+    working_dir: /app/backend
+    command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run dev"
+    env_file:
+      - backend/.env
+    environment:
+      PORT: 3004
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/artist_tracker
+      REDIS_URL: redis://redis:6379
+      ALLOWED_ORIGIN: http://localhost:3003
+    ports:
+      - "3004:3004"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  frontend:
+    build:
+      context: .
+      target: dev
+    working_dir: /app/frontend
+    command: npm run dev
+    env_file:
+      - frontend/.env.local
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:3004
+    ports:
+      - "3003:3003"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
+  node_modules:
