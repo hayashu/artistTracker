@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Artist Tracker | Live Event Map</title>
+  <meta
+    name="description"
+    content="Artist Tracker は、音楽アーティストのライブイベントを3Dグローブと2Dマップで可視化するWebアプリケーションです。"
+  />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="siteHeader" aria-label="Site header">
+    <a class="brand" href="#top">Artist Tracker</a>
+    <nav class="nav" aria-label="Primary navigation">
+      <a href="#demo">Demo</a>
+      <a href="#features">Features</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#portfolio">Portfolio</a>
+      <a href="#setup">Setup</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <img class="heroImage" src="./assets/artist-tracker-hero.png" alt="Artist Tracker interface mockup with a glowing globe and concert pins" />
+      <div class="heroOverlay"></div>
+      <div class="heroContent">
+        <p class="eyebrow">Live events, mapped globally</p>
+        <h1 id="hero-title">Artist Tracker</h1>
+        <p class="heroLead">
+          音楽アーティストのライブイベントを検索し、3Dグローブと2Dマップ上に会場ピンとして可視化するWebアプリケーション。
+        </p>
+        <div class="heroActions">
+          <a class="primaryButton" href="#architecture">技術構成を見る</a>
+          <a class="secondaryButton" href="https://github.com/hayashu/artistTracker">GitHub</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section intro" aria-labelledby="intro-title">
+      <div class="sectionHeader">
+        <p class="sectionLabel">Overview</p>
+        <h2 id="intro-title">アーティストから、世界中のライブ予定へ。</h2>
+      </div>
+      <div class="introGrid">
+        <p>
+          Ticketmaster Discovery API から取得したアーティスト・イベント・会場情報をバックエンドで正規化し、会場の緯度経度をもとに地図へ表示します。
+        </p>
+        <p>
+          検索サジェスト、スペル補正、Redisキャッシュ、現地時間とユーザー時間の併記により、ライブ遠征の判断に必要な情報をひとつの画面にまとめます。
+        </p>
+      </div>
+    </section>
+
+    <section id="demo" class="section demo" aria-labelledby="demo-title">
+      <div class="sectionHeader">
+        <p class="sectionLabel">Demo</p>
+        <h2 id="demo-title">実際の操作画面</h2>
+      </div>
+      <div class="videoFrame">
+        <video class="demoVideo" controls muted playsinline preload="metadata">
+          <source src="./assets/demo.mp4" type="video/mp4" />
+          お使いのブラウザは動画再生に対応していません。
+        </video>
+      </div>
+    </section>
+
+    <section id="features" class="section" aria-labelledby="features-title">
+      <div class="sectionHeader">
+        <p class="sectionLabel">Features</p>
+        <h2 id="features-title">主な機能</h2>
+      </div>
+      <div class="featureGrid">
+        <article class="featureCard">
+          <span class="featureMark">01</span>
+          <h3>Artist Search</h3>
+          <p>アーティスト名から候補を検索し、過去に保存されたDB情報を使ってインクリメンタルサジェストを返します。</p>
+        </article>
+        <article class="featureCard">
+          <span class="featureMark">02</span>
+          <h3>3D Globe / 2D Map</h3>
+          <p>世界中のライブ会場を、地球儀ビューとマップビューの両方で確認できます。</p>
+        </article>
+        <article class="featureCard">
+          <span class="featureMark">03</span>
+          <h3>Timezone View</h3>
+          <p>イベント現地時間とユーザーのタイムゾーンに変換した時間を並べて表示します。</p>
+        </article>
+        <article class="featureCard">
+          <span class="featureMark">04</span>
+          <h3>Expedition Planning</h3>
+          <p>会場周辺のホテル検索や経路リンクを用意し、ライブ遠征の下調べにつなげます。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="architecture" class="section architecture" aria-labelledby="architecture-title">
+      <div class="sectionHeader">
+        <p class="sectionLabel">Architecture</p>
+        <h2 id="architecture-title">技術スタック</h2>
+      </div>
+      <div class="architectureLayout">
+        <div class="techList">
+          <div><strong>Frontend</strong><span>Next.js, React, TypeScript, MapLibre GL, react-globe.gl</span></div>
+          <div><strong>Backend</strong><span>Express, TypeScript, Prisma, Axios</span></div>
+          <div><strong>Data</strong><span>PostgreSQL, Redis, Prisma migrations</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section dataModel" aria-labelledby="data-title">
+      <div class="sectionHeader">
+        <p class="sectionLabel">Data Model</p>
+        <h2 id="data-title">データベース構成</h2>
+      </div>
+      <div class="modelGrid">
+        <article>
+          <h3>Artist</h3>
+          <p>TicketmasterのアーティストID、名前、画像、ジャンルを保存します。</p>
+        </article>
+        <article>
+          <h3>Event</h3>
+          <p>ライブ名、日時、販売状態、価格、紐づくアーティストと会場を管理します。</p>
+        </article>
+        <article>
+          <h3>Venue</h3>
+          <p>会場名、都市、国、住所、緯度経度を保存し、マップ表示に利用します。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="portfolio" class="section portfolio" aria-labelledby="portfolio-title">
+      <div class="sectionHeader">
+        <p class="sectionLabel">Portfolio Notes</p>
+        <h2 id="portfolio-title">実装で工夫した点</h2>
+      </div>
+      <div class="notes">
+        <article>
+          <h3>検索予測</h3>
+          <p>DBから候補を多めに取得し、前方一致、単語先頭一致、部分一致の順でランキングします。レーベンシュタイン距離によるスペル補正も組み込んでいます。</p>
+        </article>
+        <article>
+          <h3>Redis キャッシュ</h3>
+          <p>アーティスト検索とイベント取得の結果をTTL付きで保存し、Ticketmaster APIへの不要な再問い合わせを減らします。</p>
+        </article>
+        <article>
+          <h3>時間表示</h3>
+          <p>Ticketmasterの現地日時を保持しつつ、ユーザーのタイムゾーンへ変換した表示を併記します。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="setup" class="section setup" aria-labelledby="setup-title">
+      <div class="sectionHeader">
+        <p class="sectionLabel">Run Locally</p>
+        <h2 id="setup-title">Dockerでの起動</h2>
+      </div>
+      <div class="codePanel">
+        <pre><code>npm run docker:up
+
+# Frontend
+http://localhost:3003
+
+# Backend health check
+http://localhost:3004/health
+
+# Stop
+npm run docker:down</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Artist Tracker</span>
+    <a href="https://github.com/hayashu/artistTracker">GitHub Repository</a>
+  </footer>
+</body>
+</html>
