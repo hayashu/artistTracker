@@ -29,12 +29,20 @@ function formatVenueTime(event: Event): string {
 }
 
 function formatUserTime(event: Event, timezone: string): string | null {
-  if (!event.dateTime || event.timeTBA) return null;
+  if (event.dateTBD || !event.date) return null;
   try {
-    const dt = new Date(event.dateTime);
+    const hasExactDateTime = Boolean(event.dateTime && !event.timeTBA);
+    const fallbackTime = event.time && !event.timeTBA ? event.time : "00:00:00";
+    const dt = new Date(hasExactDateTime ? event.dateTime! : `${event.date}T${fallbackTime}`);
+
+    if (Number.isNaN(dt.getTime())) return null;
+
     const dateStr = dt.toLocaleDateString("en-US", {
       timeZone: timezone, weekday: "short", month: "short", day: "numeric", year: "numeric",
     });
+
+    if (!hasExactDateTime) return dateStr;
+
     const timeStr = dt.toLocaleTimeString("en-US", {
       timeZone: timezone, hour: "2-digit", minute: "2-digit",
     });
